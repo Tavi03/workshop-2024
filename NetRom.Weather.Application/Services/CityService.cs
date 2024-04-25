@@ -1,13 +1,21 @@
-﻿using NetRom.Weather.Application.Models;
+﻿using AutoMapper;
+using NetRom.Weather.Application.Models;
 
 namespace NetRom.Weather.Application.Services;
 
 public class CityService : ICityService
 {
-    private readonly IList<CityModel> _cityModels;
+    //Note: Cititi despre repository pattern si definiti propriul repository.
+    //Note: Mutati collecatia in noul repository.
+    //Note: Repository-ul face parte din infrastructura. Nu uitati sa il adaugati la DI container.
+    //Hint: Este foarte similar cu CityService
+    //Extra: Configuration EF.
+    private IList<CityModel> _cityModels;
+    private IMapper _mapper { get; set; }
 
-    public CityService()
+    public CityService(IMapper mapper)
     {
+        _mapper = mapper;
         _cityModels = new List<CityModel>()
         {
             new()
@@ -39,20 +47,17 @@ public class CityService : ICityService
 
     public Task<Guid> CreateAsync(CityModelForCreation cityModelForCreation)
     {
-        var newCity = new CityModel()
-        {
-            Id = Guid.NewGuid(),
-            Latitude = cityModelForCreation.Latitude,
-            Longitude = cityModelForCreation.Longitude,
-            Name = cityModelForCreation.Name,
-        };
+        //Note: Nu avem id. 
+        //Note: Putem genera unul in mapare/profil?
+        var newCity = _mapper.Map<CityModel>(cityModelForCreation);
+
         _cityModels.Add(newCity);
         return Task.FromResult(newCity.Id);
     }
 
-    public Task DeleteAsync(Guid cityId)
+    public async Task DeleteAsync(Guid cityId)
     {
-        throw new NotImplementedException();
+        _cityModels = await Task.FromResult(_cityModels.Where(c => c.Id != cityId).ToList());
     }
 
     public async Task<IEnumerable<CityModel>> GetAllAsync()
@@ -60,16 +65,25 @@ public class CityService : ICityService
         return await Task.FromResult(_cityModels);
     }
 
-    //Note (Practice): Trebuie sa cautam in colectia din memorie entitate de tip City folosind id-ul primit de la caller
-    //Note (Practice): Apoi sa facem update la editatea gasita.
-    //Note (Practice): Nu uitati de async
-    public Task<CityModel> GetByIdAsync(Guid cityId)
+    public async Task<CityModel?> GetByIdAsync(Guid cityId)
     {
-        throw new NotImplementedException();
+        var cityModel = await Task.FromResult(_cityModels.FirstOrDefault(c => c.Id == cityId));
+        return cityModel;
     }
 
-    public Task<CityModel> UpdateAsync(CityModel cityModel)
+    public async Task<CityModel> UpdateAsync(CityModel cityModel)
     {
-        throw new NotImplementedException();
+        var entity = _cityModels.FirstOrDefault(c => c.Id == cityModel.Id);
+
+        if (entity == null)
+        {
+            throw new Exception("Orasul nu exita");
+        }
+
+        entity.Name = cityModel.Name;
+        entity.Latitude = cityModel.Latitude;
+        entity.Longitude = cityModel.Longitude;
+
+        return await Task.FromResult(cityModel);
     }
 }

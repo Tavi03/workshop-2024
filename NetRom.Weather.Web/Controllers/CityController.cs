@@ -24,7 +24,6 @@ namespace NetRom.Weather.Web.Controllers
         }
 
         //Note: Enpoint pentru a creea un nou oras
-        //Note (Practice): Puteti sa adaugati server side validation pentru view model. Vedeti commentul de la Update [HttpPut]
         [HttpPost]
         public async Task<IActionResult> Create(CityModelForCreation cityModelForCreation)
         {
@@ -34,20 +33,20 @@ namespace NetRom.Weather.Web.Controllers
         }
 
         //Note: Enpoint pentru a creea un oras nou
-        [HttpDelete]
-        public async Task Delete(Guid cityId)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            await _cityService.DeleteAsync(cityId);
+            await _cityService.DeleteAsync(id);
+
+            return RedirectToAction(nameof(Index));
         }
 
         //Note: Endpoint pentru a updata un oras existent
-        [HttpPut]
-        public async Task<IActionResult> Update(CityModel cityModel)
+        public async Task<IActionResult> Edit(CityModel cityModel)
         {
-            //if(ModelState.IsValid) 
-            //{
-            //    return View(cityModel);
-            //}
+            if (!ModelState.IsValid)
+            {
+                return View(cityModel);
+            }
 
             var result = await _cityService.UpdateAsync(cityModel);
 
@@ -60,9 +59,12 @@ namespace NetRom.Weather.Web.Controllers
             return View();
         }
 
-        //Note (Practice): Endpoint pentru a obtine view-ul pentru edit si a-l popula cu datele currente
-        //Note (Practice): Pentru a creea view-ul de Edit. Click dreapta pe folderul Views/City => Add view => Razor view si urmati pasii ca in Workshop.
-        //Note (Practice): Va puteti gandi cum am putea sa facem sa obtinem datele si a redirectiona catre view-ul necesar (_cityService.GetByIdAsync) si Create [HttpPost] ca exemplu
-        //Note (Practice): Vedeti in Views/City/Index.cshtml <a> tag-ul de Edit si parametrul rutei.
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var model = await _cityService.GetByIdAsync(id);
+
+            return View(model);
+        }
     }
 }
