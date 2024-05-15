@@ -1,4 +1,4 @@
-﻿namespace NetRom.Weather.Application;
+﻿namespace NetRom.Weather.Application.Options;
 public class WeatherApiOptions
 {
     public string Url { get; set; } = null!;

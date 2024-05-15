@@ -11,7 +11,7 @@ public class CityService : ICityService
     //Hint: Este foarte similar cu CityService
     //Extra: Configuration EF.
     private IList<CityModel> _cityModels;
-    private readonly 
+    private readonly IWeatherServices _weatherService;
     private IMapper _mapper { get; set; }
 
     public CityService(IMapper mapper, IWeatherServices weatherService)
@@ -67,7 +67,7 @@ public class CityService : ICityService
         foreach (var city in _cityModels)
         {
             var cityWeather = await _weatherService.GetWeatherAsync(city.Latitude, city.Longitude);
-            city.Temperature = cityWeather.Main?.Temperature;
+            city.Temperature = cityWeather.Main.Temp;
         }
         return await Task.FromResult(_cityModels);
     }

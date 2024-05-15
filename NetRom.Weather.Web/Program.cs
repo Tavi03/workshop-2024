@@ -1,4 +1,5 @@
 using NetRom.Weather.Application;
+using NetRom.Weather.Application.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
